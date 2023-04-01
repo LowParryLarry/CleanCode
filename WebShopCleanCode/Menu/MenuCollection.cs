@@ -1,9 +1,10 @@
 ﻿namespace WebShopCleanCode.Menu;
 using WebShop;
 
+
 public class MenuCollection
 {
-        public List<Menu> Menus { get; } = new();
+    public List<Menu> Menus { get; } = new();
     public Menu CurrentMenu { get; set; }
     private List<int> MenuHistory { get; } = new();
     public int SelectedIndex { get; set; }
@@ -42,27 +43,27 @@ public class MenuCollection
 
     private void PrintMenuItems(Menu currentMenu)
     {
+        Console.OutputEncoding = System.Text.Encoding.Unicode;
         Console.CursorVisible = false;
-        
         Console.WriteLine(currentMenu.Prompt);
-        
+
+        const string whiteSpace = "   ";
+        const string spaceInvader = "\ud83d\udc7e ";
+
         for (var i = 0; i < currentMenu.MenuItems.Count; i++)
         {
+            var menuItem = currentMenu.MenuItems[i].Title;
+            
             if (i == SelectedIndex)
             {
-                Console.ForegroundColor = ConsoleColor.Black;
-                Console.BackgroundColor = ConsoleColor.White;
+                Console.WriteLine($"{spaceInvader}{menuItem}");
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.BackgroundColor = ConsoleColor.Black;
+                Console.WriteLine($"{whiteSpace}{menuItem}");
             }
-
-            Console.WriteLine($"{currentMenu.MenuItems[i].Title}"); //TODO {i + 1}:  
         }
-        Console.ResetColor();
-        
+
         PrintFundsIfPurchaseMenu();
         
         Console.WriteLine("\nYour buttons are ↑ ↓, Enter to confirm.");
