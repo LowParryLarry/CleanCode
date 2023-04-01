@@ -59,13 +59,13 @@ public class MenuCollection
                 Console.BackgroundColor = ConsoleColor.Black;
             }
 
-            Console.WriteLine($"{i + 1}: {currentMenu.MenuItems[i].Title}");
+            Console.WriteLine($"{currentMenu.MenuItems[i].Title}"); //TODO {i + 1}:  
         }
         Console.ResetColor();
         
         PrintFundsIfPurchaseMenu();
         
-        Console.WriteLine("Your buttons are ↑ ↓, Enter to confirm.");
+        Console.WriteLine("\nYour buttons are ↑ ↓, Enter to confirm.");
         WebShopInstance.PrintCurrentUser();
     }
 
