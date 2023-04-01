@@ -66,7 +66,6 @@ public class Customer
     {
         return Password;
     }
-    
     public string GetUsername()
     {
         return Username;
@@ -120,4 +119,6 @@ public class Customer
 
         Console.WriteLine($"\n{amount} added to your profile.\n");
     }
+    
+    
 }

@@ -5,9 +5,9 @@ using Menu;
 
 public class AuthenticatedState : ILoginState
 {
-    public void ExecuteMenuItem(MenuCollection menuCollection, MenuItem menuItemSelected)
+    public void ProcessMenuItem(MenuCollection menuCollection, MenuItem selectedMenuItem)
     {
-        menuCollection.RunMenuItem(menuItemSelected);
+        menuCollection.ExecuteOrNavigate(selectedMenuItem);
     }
 
     public void ToggleLoginState(WebShop webShop)

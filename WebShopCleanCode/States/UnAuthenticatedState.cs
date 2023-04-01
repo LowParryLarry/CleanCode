@@ -6,16 +6,16 @@ using Menu;
 
 public class UnAuthenticatedState : ILoginState
 {
-    public void ExecuteMenuItem(MenuCollection menuCollection, MenuItem menuItemSelected)
+    public void ProcessMenuItem(MenuCollection menuCollection, MenuItem selectedMenuItem)
     {
-        if (menuItemSelected.AuthenticationRequired)
+        if (selectedMenuItem.AuthenticationRequired)
         {
             Console.WriteLine("\nNobody is logged in.\n");
             menuCollection.RunMenu(menuCollection.CurrentMenu.MenuId);
         }
         else
         {
-            menuCollection.RunMenuItem(menuItemSelected);
+            menuCollection.ExecuteOrNavigate(selectedMenuItem);
         }
     }
 

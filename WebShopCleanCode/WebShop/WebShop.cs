@@ -1,4 +1,6 @@
-﻿namespace WebShopCleanCode.WebShop;
+﻿using WebShopCleanCode.Static;
+
+namespace WebShopCleanCode.WebShop;
 
 using SortingAlgorithms;
 using System.Text.RegularExpressions;
@@ -35,7 +37,7 @@ public class WebShop
     }
     
     private MenuCollection CreateMenuCollection()
-    {
+    {//TODO command?
         return new MenuCollection(this)
         {
             Menus =
@@ -66,7 +68,7 @@ public class WebShop
                         new MenuItem
                         {
                             Title = "Quit",
-                            Action = () => MenuCollection.Quit()
+                            Action = Utility.Quit
                         }
                     }
                 },
@@ -115,12 +117,12 @@ public class WebShop
                         new MenuItem
                         {
                             Title = "Set Username",
-                            Action = () => SetUserData("Please input your username.", UserDataType.Username)
+                            Action = () => SetCredentials("Please input your username.", UserDataType.Username)
                         },
                         new MenuItem
                         {
                             Title = "Set Password",
-                            Action = () => SetUserData("Please input your passowrd.", UserDataType.Password)
+                            Action = () => SetCredentials("Please input your passowrd.", UserDataType.Password)
                         },
                         new MenuItem
                         {
@@ -220,18 +222,16 @@ public class WebShop
         };
     }
 
-    private void PrintAllWares()
-    {
-        PrintEmptyLine();
-        
-        foreach (var item in Products) item.PrintInfo();
-        
-        PrintEmptyLine();
-    }
-
     public void Run()
     {
         MenuCollection.RunMenu(MenuCollection.SelectedIndex);
+    }
+
+    private void PrintAllWares()
+    {
+        Utility.PrintEmptyLine();
+        foreach (var item in Products) item.PrintInfo();
+        Utility.PrintEmptyLine();
     }
 
     public void PrintCurrentUser()
@@ -241,12 +241,7 @@ public class WebShop
             : $"Current user: {CurrentCustomer.Username}\n");
     }
 
-    private static void PrintEmptyLine()
-    {
-        Console.WriteLine();
-    }
-
-    private void SetUserData(string promt, UserDataType userDataType)
+    private void SetCredentials(string promt, UserDataType userDataType)
     {
         Console.CursorVisible = true;
         
@@ -263,7 +258,7 @@ public class WebShop
                     break;
         }
 
-        PrintEmptyLine();
+        Utility.PrintEmptyLine();
     }
 
     private void SetState(ILoginState state)
@@ -293,12 +288,6 @@ public class WebShop
                 }
             }
         }
-    }
-
-    private void ResetTempData()
-    {
-        TempUsername = string.Empty;
-        TempPassword = string.Empty;
     }
 
     private void RegisterUser()
@@ -372,7 +361,7 @@ public class WebShop
 
         while (true)
         {
-            Console.WriteLine($"Do you want {determiner} {formattedProperyName}? y/n");
+            Console.WriteLine($"Do you want {determiner}{formattedProperyName}? y/n");
             Console.CursorVisible = true;
             
             var ynChoice = Console.ReadLine();
@@ -390,9 +379,9 @@ public class WebShop
         }
     }
 
-    private static object ConvertIfInt(object inputString) //str
+    private static object ConvertIfInt(object inputString) 
     {
-        if (int.TryParse(inputString.ToString(), out var intValue)) //- tostr
+        if (int.TryParse(inputString.ToString(), out var intValue))
         {
             return intValue;
         }
@@ -432,35 +421,36 @@ public class WebShop
         if (string.IsNullOrEmpty(word)) return string.Empty;
 
         var firstLetter = char.ToLower(word[0]);
-        string[] vowels = {"A", "E", "I", "O", "U"};
+        char[] vowels = { 'a', 'e', 'i', 'o', 'u' };
 
-        foreach (var vowel in vowels)
-        {
-            if (firstLetter.ToString() == vowel)
-            {
-                return "an";
-            }
-        }
-
-        return "a";
+        return Array.IndexOf(vowels, firstLetter) >= 0 ? "an" : "a";
     }
 
     public void TryLogin()
     {
-        var customer = Customers.FirstOrDefault(c =>
-            c.CheckUsername(TempUsername) && c.CheckPassword(TempPassword));
+        var customer = CheckCredentials(TempUsername, TempPassword);
 
-        if (customer != null)
-        {
-            PrintAuthSuccess(customer);
-            CurrentCustomer = customer;
-            ToggleLoginLogoutTitle();
-            SetState(new AuthenticatedState());
-        }
-        else
+        if (customer == null)
         {
             Console.WriteLine("Invalid credentials.\n");
+            return;
         }
+
+        LoginProcess(customer);
+    }
+
+    private void LoginProcess(Customer customer)
+    {
+        PrintAuthSuccess(customer);
+        CurrentCustomer = customer;
+        ToggleLoginLogoutTitle();
+        SetState(new AuthenticatedState());
+    }
+
+    private Customer CheckCredentials(string username, string password)
+    {
+        return Customers.FirstOrDefault(c =>
+            c.CheckUsername(username) && c.CheckPassword(password));
     }
 
     public void Logout()
@@ -491,5 +481,11 @@ public class WebShop
         product.NrInStock--;
 
         Console.WriteLine($"Successfully bought {product.Name}\n");
+    }
+
+    private void ResetTempData()
+    {
+        TempUsername = string.Empty;
+        TempPassword = string.Empty;
     }
 }

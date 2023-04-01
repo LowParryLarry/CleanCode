@@ -19,12 +19,8 @@ public class MenuCollection
     public void RunMenu(int id)
     {
         CurrentMenu = GetMenu(id);
-
-        PrintMenu();
-
-        var selectedMenuItem = CurrentMenu.MenuItems[SelectedIndex];
-
-        ExecuteMenuItem(selectedMenuItem);
+        PrintMenuGetIndex();
+        ProcessMenuItem(CurrentMenu.MenuItems[SelectedIndex]);
     }
 
     private Menu GetMenu(int id)
@@ -32,13 +28,12 @@ public class MenuCollection
         return Menus.Single(menu => menu.MenuId == id);
     }
 
-    private void PrintMenu()
+    private void PrintMenuGetIndex()
     {
         do
         {
             PrintMenuItems(CurrentMenu);
         } while (SetSelectedIndex(CurrentMenu) != ConsoleKey.Enter);
-        
     }
 
     private void PrintMenuItems(Menu currentMenu)
@@ -65,7 +60,6 @@ public class MenuCollection
         }
 
         PrintFundsIfPurchaseMenu();
-        
         Console.WriteLine("\nYour buttons are ↑ ↓, Enter to confirm.");
         WebShopInstance.PrintCurrentUser();
     }
@@ -77,9 +71,9 @@ public class MenuCollection
         Console.WriteLine($"Your funds: {funds}");
     }
 
-    private void ExecuteMenuItem(MenuItem menuItemSelected)
+    private void ProcessMenuItem(MenuItem menuItemSelected)
     {
-        WebShopInstance.State.ExecuteMenuItem(this, menuItemSelected);
+        WebShopInstance.State.ProcessMenuItem(this, menuItemSelected);
     }
 
     private ConsoleKey SetSelectedIndex(Menu currentMenu)
@@ -107,7 +101,7 @@ public class MenuCollection
         return keyPressed;
     }
 
-    public void RunMenuItem(MenuItem menuItemSelected)
+    public void ExecuteOrNavigate(MenuItem menuItemSelected)
     {
         SelectedIndex = 0;
         
@@ -125,17 +119,12 @@ public class MenuCollection
 
     public void Back()
     {
-        var lastEntry = MenuHistory.Last();
+        var previousMenu = MenuHistory.Last();
         
         MenuHistory.RemoveAt(MenuHistory.Count - 1);
         
-        RunMenu(lastEntry);
+        RunMenu(previousMenu);
     }
 
-    public static void Quit()
-    {
-        Console.WriteLine("\nThe console powers down. You are free to leave.");
-        Environment.Exit(0);
-    }
     
 }
