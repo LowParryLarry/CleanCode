@@ -1,8 +1,10 @@
-﻿namespace WebShopCleanCode.WebShop;
+﻿using WebShopCleanCode.Static;
+
+namespace WebShopCleanCode.WebShop;
 
 public class Customer
 {
-        public string Username { get; set; }
+    public string Username { get; set; }
     private string Password { get; set; }
     private string FirstName { get; set;}
     private string LastName { get; set;}
@@ -17,8 +19,7 @@ public class Customer
     public Customer(
         string username, string password, string firstName,
         string lastName, string email, int age,
-        string address, string phoneNumber
-        )
+        string address, string phoneNumber)
     {
         Username = username;
         Password = password;
@@ -44,7 +45,6 @@ public class Customer
         PhoneNumber = string.Empty;
         Orders = new List<Order>(); 
         Funds = 0;
-        
     }
 
     public bool CanAfford(int price)
@@ -61,11 +61,12 @@ public class Customer
     {
         return username.Equals(Username);
     }
-
+    
     public string GetPassword()
     {
         return Password;
     }
+    
     public string GetUsername()
     {
         return Username;
@@ -86,9 +87,9 @@ public class Customer
 
     public void PrintOrders()
     {
-        Console.WriteLine();
+        Utility.PrintEmptyLine();
         foreach (var order in Orders) order.PrintInfo();
-        Console.WriteLine();
+        Utility.PrintEmptyLine();
     }
 
     public void AddOrder(string name, int price)
@@ -97,7 +98,7 @@ public class Customer
     }
 
     public void AddFunds()
-    {//TODO Don't add negative amounts.
+    {
         Console.CursorVisible = true;
         Console.WriteLine("How many funds would you like to add?");
 

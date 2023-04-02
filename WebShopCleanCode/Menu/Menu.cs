@@ -3,6 +3,16 @@ using WebShop;
 
 public class Menu
 {
+    private WebShop WebShopInstance { get; set; }
+
+    public string Prompt { get; init; }
+
+    public int Id { get; init; }
+
+    public List<MenuItem> MenuItems { get; set; }
+
+    public string Title { get; set; }
+
     public Menu()
     {
         MenuItems = new List<MenuItem>();
@@ -14,16 +24,6 @@ public class Menu
         MenuItems = new List<MenuItem>();
         ConvertProductsToMenuItems();
     }
-    
-    private WebShop WebShopInstance { get; set; }
-
-    public string Prompt { get; init; }
-    
-    public int MenuId { get; init; }
-    
-    public List<MenuItem> MenuItems { get; set; }
-
-    public string Title { get; set; }
 
     private void ConvertProductsToMenuItems()
     {

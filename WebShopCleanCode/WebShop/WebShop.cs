@@ -1,7 +1,6 @@
-﻿using WebShopCleanCode.Static;
+﻿namespace WebShopCleanCode.WebShop;
 
-namespace WebShopCleanCode.WebShop;
-
+using Static;
 using SortingAlgorithms;
 using System.Text.RegularExpressions;
 using Interfaces;
@@ -26,7 +25,7 @@ public class WebShop
         Products = Database.GetProducts();
         Customers = Database.GetCustomers();
         MenuCollection = CreateMenuCollection();
-        TempUsername = "jake"; //string.Empty;
+        TempUsername = "jake"; //string.Empty; TODO To bort innan inlämning
         TempPassword = "jake123"; //string.Empty;
     }
 
@@ -37,7 +36,7 @@ public class WebShop
     }
     
     private MenuCollection CreateMenuCollection()
-    {//TODO command?
+    {
         return new MenuCollection(this)
         {
             Menus =
@@ -46,7 +45,7 @@ public class WebShop
                 {
                     Title = "Main Menu",
                     Prompt = "What would you like to do?",
-                    MenuId = 0,
+                    Id = 0,
                     MenuItems =
                     {
                         new MenuItem
@@ -76,7 +75,7 @@ public class WebShop
                 {
                     Title = "Wares Menu",
                     Prompt = "What would you like to do?",
-                    MenuId = 1,
+                    Id = 1,
                     MenuItems =
                     {
                         new MenuItem
@@ -111,7 +110,7 @@ public class WebShop
                 {
                     Title = "Login Menu",
                     Prompt = "Please submit username and password.",
-                    MenuId = 2,
+                    Id = 2,
                     MenuItems =
                     {
                         new MenuItem
@@ -145,7 +144,7 @@ public class WebShop
                 {
                     Title = "Sort Menu",
                     Prompt = "How would you like to sort them?",
-                    MenuId = 3,
+                    Id = 3,
                     MenuItems =
                     {
                         new MenuItem
@@ -179,7 +178,7 @@ public class WebShop
                 {
                     Title = "Customer Menu",
                     Prompt = "What would you like to do?",
-                    MenuId = 4,
+                    Id = 4,
                     MenuItems =
                     {
                         new MenuItem
@@ -208,7 +207,7 @@ public class WebShop
                 {
                     Title = "Purchase Menu",
                     Prompt = "What would you like to purchase?",
-                    MenuId = 5,
+                    Id = 5,
                     MenuItems =
                     {
                         new MenuItem
@@ -221,12 +220,14 @@ public class WebShop
             }
         };
     }
-
+    
     public void Run()
     {
+        Console.WriteLine(MenuCollection.Menus.Count);
+        Console.WriteLine("Welcome to the WebShop!");
         MenuCollection.RunMenu(MenuCollection.SelectedIndex);
     }
-
+    
     private void PrintAllWares()
     {
         Utility.PrintEmptyLine();
@@ -236,9 +237,13 @@ public class WebShop
 
     public void PrintCurrentUser()
     {
-        Console.WriteLine(CurrentCustomer == null
-            ? "Nobody logged in.\n"
-            : $"Current user: {CurrentCustomer.Username}\n");
+        if (CurrentCustomer == null)
+        {
+            Console.WriteLine("Nobody logged in.\n");
+            return;
+        }
+        
+        Console.WriteLine($"Current user: {CurrentCustomer.Username}\n");
     }
 
     private void SetCredentials(string promt, UserDataType userDataType)
@@ -276,10 +281,16 @@ public class WebShop
         Console.WriteLine($"\n{customer.Username} logged in.\n");
     }
 
-    private void ToggleLoginLogoutTitle()
+    private void ToggleMenuExeptions()
     {
-        foreach (var menu in MenuCollection.Menus)
-        {//TODO Register ska inte finnas om inloggad
+        /*
+         En riktig ful-lösning. Jag hade byggt menysystemet innan
+         jag insåg att det INTE var en statisk meny. Hade kanske
+         kunnat göra ett state för detta men det kändes dumt.
+         */
+        
+        foreach (var menu in MenuCollection.Menus.ToList())
+        {
             foreach (var menuItem in menu.MenuItems)
             {
                 if (menuItem.Title is "Login" or "Logout")
@@ -293,25 +304,39 @@ public class WebShop
     private void RegisterUser()
     {
         Customer customer = new();
-        
         SetUsername(customer);
         SetProperties(customer);
         Database.AddNewCustomer(customer);
-        
         TryLogin();
     }
 
-    private static void SetUsername(Customer customer)
+    private void SetUsername(Customer customer)
     {
-        Console.CursorVisible = true;
-        Console.WriteLine("Please write your username.");
-        customer.Username = Console.ReadLine();
-    }
+        while (true)
+        {
+            Console.CursorVisible = true;
+            Console.WriteLine("Please write your username.");
+            string input = Console.ReadLine();
 
+            if (string.IsNullOrEmpty(input))
+            {
+                Console.WriteLine("\nPlease actually write something.\n");
+            }
+            else if (Database.UsernameExists(input))
+            {
+                Console.WriteLine("\nUsername already exists.\n");
+            }
+            else
+            {
+                customer.Username = input;
+                return;
+            }
+        }
+    }
+    
     private void SetProperties(Customer customer)
     {
         var properties = GetCustomerProperties();
-
         foreach (var property in properties)
         {
             if (PropertyExclusion(property))
@@ -327,7 +352,7 @@ public class WebShop
                 property.SetValue(customer, ConvertIfInt(userInput));
             }
         }
-
+        
         TempUsername = customer.GetUsername();
         TempPassword = customer.GetPassword();
     }
@@ -347,18 +372,15 @@ public class WebShop
     private static string FormatPropertyName(string input)
     {
         var splitString = Regex.Replace(input, "([A-Z])", " $1");
-
         var lowerCaseString = splitString.ToLower();
-
         return lowerCaseString;
     }
 
     private static object UserInput(string determiner, string propertyName)
     {
         var formattedProperyName = FormatPropertyName(propertyName);
-        
         const string ynError = "y or n, please.\n";
-
+        
         while (true)
         {
             Console.WriteLine($"Do you want {determiner}{formattedProperyName}? y/n");
@@ -388,10 +410,10 @@ public class WebShop
 
         return inputString;
     }
-
+   
     private static string CheckForInputError(string propertyName)
     {
-        const string inputError = "Please actually write something.";
+        const string inputError = "Please actually write something.\n";
         string input;
 
         while (true)
@@ -401,16 +423,12 @@ public class WebShop
         
             input = Console.ReadLine();
 
-            if (input != string.Empty)
+            if (!string.IsNullOrEmpty(input))
             {
                 break;
             }
-
-            if (input == string.Empty)
-            {
-                Console.WriteLine(inputError);
-            }
             
+            Console.WriteLine(inputError);
         }
 
         return input;
@@ -443,8 +461,8 @@ public class WebShop
     {
         PrintAuthSuccess(customer);
         CurrentCustomer = customer;
-        ToggleLoginLogoutTitle();
         SetState(new AuthenticatedState());
+        ToggleMenuExeptions();
     }
 
     private Customer CheckCredentials(string username, string password)
@@ -457,9 +475,9 @@ public class WebShop
     {
         Console.WriteLine($"\n{CurrentCustomer.Username} logged out\n");
         CurrentCustomer = null;
-        ToggleLoginLogoutTitle();
         SetState(new UnAuthenticatedState());
         ResetTempData();
+        ToggleMenuExeptions();
     }
 
     public static void WithdrawFundsFromCustomer(Customer currentCustomer, Product product)
@@ -469,7 +487,6 @@ public class WebShop
             Console.WriteLine($"Not in stock.\n");
             return;
         }
-
         if (!currentCustomer.CanAfford(product.Price))
         {
             Console.WriteLine($"You cannot afford.\n");

@@ -2,9 +2,9 @@
 
 public class Order
 {
-    public string Name { get; set; }
-    public int BoughtFor { get; set; }
-    public DateTime PurchaseTime { get; set; }
+    private string Name { get; set; }
+    private int BoughtFor { get; set; }
+    private DateTime PurchaseTime { get; set; }
     public Order(string name, int boughtFor, DateTime purchaseTime)
     {
         Name = name;
@@ -13,7 +13,6 @@ public class Order
     }
     public void PrintInfo()
     {
-        //Console.WriteLine(Name + ", bought for " + BoughtFor + "kr, time: " + PurchaseTime + ".");
         Console.WriteLine($"{Name} bought for {BoughtFor}kr, time: {PurchaseTime}");
     }
 }

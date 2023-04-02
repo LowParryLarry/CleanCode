@@ -1,10 +1,12 @@
 ﻿namespace WebShopCleanCode.WebShop;
 using Builders;
 
+
 public class Database
 {
     private readonly List<Product> _productsInDatabase;
     private readonly List<Customer> _customersInDatabase;
+    
     public Database()
     {
         _productsInDatabase = new List<Product>
@@ -54,11 +56,13 @@ public class Database
 
     public bool UsernameExists(string username)
     {
+         
         return _customersInDatabase.Any(user => user.CheckUsername(username));
     }
 
     public void AddNewCustomer(Customer newCustomer)
     {
         _customersInDatabase.Add(newCustomer);
-    }   
+    }
+
 }

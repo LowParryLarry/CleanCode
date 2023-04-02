@@ -4,7 +4,7 @@ using WebShop;
 
 public class MenuCollection
 {
-    public List<Menu> Menus { get; } = new();
+    public List<Menu> Menus { get; set; } = new();
     public Menu CurrentMenu { get; set; }
     private List<int> MenuHistory { get; } = new();
     public int SelectedIndex { get; set; }
@@ -25,7 +25,7 @@ public class MenuCollection
 
     private Menu GetMenu(int id)
     {
-        return Menus.Single(menu => menu.MenuId == id);
+        return Menus.Single(menu => menu.Id == id);
     }
 
     private void PrintMenuGetIndex()
@@ -40,7 +40,7 @@ public class MenuCollection
     {
         Console.OutputEncoding = System.Text.Encoding.Unicode;
         Console.CursorVisible = false;
-        Console.WriteLine(currentMenu.Prompt);
+        Console.WriteLine(currentMenu.Prompt + "\n");
 
         const string whiteSpace = "   ";
         const string spaceInvader = "\ud83d\udc7e ";
@@ -107,13 +107,13 @@ public class MenuCollection
         
         if (menuItemSelected.SubMenuId.HasValue)
         {
-            MenuHistory.Add(CurrentMenu.MenuId);
+            MenuHistory.Add(CurrentMenu.Id);
             RunMenu(menuItemSelected.SubMenuId.Value);
         }
         else
         {
             menuItemSelected.Action();
-            RunMenu(CurrentMenu.MenuId);
+            RunMenu(CurrentMenu.Id);
         }
     }
 
