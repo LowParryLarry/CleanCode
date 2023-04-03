@@ -10,7 +10,7 @@ public class AuthenticatedState : ILoginState
         menuCollection.ExecuteOrNavigate(selectedMenuItem);
     }
 
-    public void ToggleLoginState(WebShop webShop)
+    public void ChangeLoginState(WebShop webShop)
     {
         webShop.Logout();
     }

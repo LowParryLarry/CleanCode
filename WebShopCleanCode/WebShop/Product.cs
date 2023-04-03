@@ -13,11 +13,19 @@ public class Product : MenuItem
         Price = price;
         NrInStock = nrInStock;
     }
+    
+    /// <summary>
+    /// Prints name, price and stock for current product.
+    /// </summary>
     public void PrintInfo()
     {
         Console.WriteLine($"{Name}: {Price}kr, {NrInStock} in stock.");
     }
 
+    /// <summary>
+    /// Returns bool if product is in stock.
+    /// </summary>
+    /// <returns></returns>
     public bool ProductIsInStock()
     {
         return NrInStock > 0;

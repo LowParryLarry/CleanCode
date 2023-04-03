@@ -15,7 +15,6 @@ public class Customer
     public int Funds { get; set; }
     private List<Order> Orders { get; }
 
-
     public Customer(
         string username, string password, string firstName,
         string lastName, string email, int age,
@@ -47,31 +46,57 @@ public class Customer
         Funds = 0;
     }
 
+    /// <summary>
+    /// Returns true if funds exeed the given price.
+    /// </summary>
+    /// <param name="price"></param>
+    /// <returns></returns>
     public bool CanAfford(int price)
     {
         return Funds >= price;
     }
 
+    /// <summary>
+    /// Returns true if given password equals actual password.
+    /// </summary>
+    /// <param name="password"></param>
+    /// <returns></returns>
     public bool CheckPassword(string password)
     {
         return password.Equals(Password);
     }
 
+    /// <summary>
+    /// Returns true if given username equals actual username.
+    /// </summary>
+    /// <param name="username"></param>
+    /// <returns></returns>
     public bool CheckUsername(string username)
     {
         return username.Equals(Username);
     }
     
+    /// <summary>
+    /// Returns password.
+    /// </summary>
+    /// <returns></returns>
     public string GetPassword()
     {
         return Password;
     }
     
+    /// <summary>
+    /// Returns username
+    /// </summary>
+    /// <returns></returns>
     public string GetUsername()
     {
         return Username;
     }
 
+    /// <summary>
+    /// Prints summary of customer.
+    /// </summary>
     public void PrintInfo()
     {
         Console.Write("\nUsername: " + Username + "");
@@ -85,6 +110,9 @@ public class Customer
         Console.WriteLine(", Funds: " + Funds +"\n");
     }
 
+    /// <summary>
+    /// Prints orders of customer.
+    /// </summary>
     public void PrintOrders()
     {
         Utility.PrintEmptyLine();
@@ -92,11 +120,19 @@ public class Customer
         Utility.PrintEmptyLine();
     }
 
+    /// <summary>
+    /// Adds new order for customer.
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="price"></param>
     public void AddOrder(string name, int price)
     {
         Orders.Add(new Order(name, price, DateTime.Now));
     }
 
+    /// <summary>
+    /// Adds given funds to customer.
+    /// </summary>
     public void AddFunds()
     {
         Console.CursorVisible = true;
@@ -120,6 +156,4 @@ public class Customer
 
         Console.WriteLine($"\n{amount} added to your profile.\n");
     }
-    
-    
 }

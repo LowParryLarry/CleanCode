@@ -11,7 +11,7 @@ public class UnAuthenticatedState : ILoginState
         if (selectedMenuItem.AuthenticationRequired)
         {
             Console.WriteLine("\nNobody is logged in.\n");
-            menuCollection.RunMenu(menuCollection.CurrentMenu.Id);
+            menuCollection.RunMenu(menuCollection.CurrentMenu.SubMenuId);
         }
         else
         {
@@ -19,7 +19,7 @@ public class UnAuthenticatedState : ILoginState
         }
     }
 
-    public void ToggleLoginState(WebShop webShop)
+    public void ChangeLoginState(WebShop webShop)
     {
         webShop.TryLogin();
     }

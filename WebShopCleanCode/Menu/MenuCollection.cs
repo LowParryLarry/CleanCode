@@ -9,13 +9,16 @@ public class MenuCollection
     private List<int> MenuHistory { get; } = new();
     public int SelectedIndex { get; set; }
     private WebShop WebShopInstance { get; }
-
     public MenuCollection(WebShop webShop)
     {
         WebShopInstance = webShop;
         MenuHistory.Add(SelectedIndex);
     }
-    
+
+    /// <summary>
+    /// Runs menu.
+    /// </summary>
+    /// <param name="id"></param>
     public void RunMenu(int id)
     {
         CurrentMenu = GetMenu(id);
@@ -23,11 +26,9 @@ public class MenuCollection
         ProcessMenuItem(CurrentMenu.MenuItems[SelectedIndex]);
     }
 
-    private Menu GetMenu(int id)
-    {
-        return Menus.Single(menu => menu.Id == id);
-    }
-
+    /// <summary>
+    /// Prints menu to console. Exits while loop on Enter.
+    /// </summary>
     private void PrintMenuGetIndex()
     {
         do
@@ -36,6 +37,10 @@ public class MenuCollection
         } while (SetSelectedIndex(CurrentMenu) != ConsoleKey.Enter);
     }
 
+    /// <summary>
+    /// Prints menu and sets space-invader to selected menu item.
+    /// </summary>
+    /// <param name="currentMenu"></param>
     private void PrintMenuItems(Menu currentMenu)
     {
         Console.OutputEncoding = System.Text.Encoding.Unicode;
@@ -64,18 +69,26 @@ public class MenuCollection
         WebShopInstance.PrintCurrentUser();
     }
 
+    /// <summary>
+    /// If current menu is Purchase menu, will display funds.
+    /// </summary>
     private void PrintFundsIfPurchaseMenu()
     {
         if (CurrentMenu.Title != "Purchase Menu") return;
         var funds = WebShopInstance.CurrentCustomer.Funds;
-        Console.WriteLine($"Your funds: {funds}");
+        Console.WriteLine($"\nYour funds: {funds}");
     }
-
+    
     private void ProcessMenuItem(MenuItem menuItemSelected)
     {
         WebShopInstance.State.ProcessMenuItem(this, menuItemSelected);
     }
 
+    /// <summary>
+    /// Sets the index of currently selected item.
+    /// </summary>
+    /// <param name="currentMenu"></param>
+    /// <returns></returns>
     private ConsoleKey SetSelectedIndex(Menu currentMenu)
     {
         var keyInfo = Console.ReadKey(true);
@@ -101,22 +114,39 @@ public class MenuCollection
         return keyPressed;
     }
 
-    public void ExecuteOrNavigate(MenuItem menuItemSelected)
+    /// <summary>
+    /// Returns menu by id.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    private Menu GetMenu(int id)
+    {
+        return Menus.Single(menu => menu.SubMenuId == id);
+    }
+
+    /// <summary>
+    /// If menu item is Action, execute. If menu is sub menu, run sub menu.
+    /// </summary>
+    /// <param name="selectedMenuItem"></param>
+    public void ExecuteOrNavigate(MenuItem selectedMenuItem)
     {
         SelectedIndex = 0;
         
-        if (menuItemSelected.SubMenuId.HasValue)
+        if (selectedMenuItem.SubMenuId.HasValue)
         {
-            MenuHistory.Add(CurrentMenu.Id);
-            RunMenu(menuItemSelected.SubMenuId.Value);
+            MenuHistory.Add(CurrentMenu.SubMenuId);
+            RunMenu(selectedMenuItem.SubMenuId.Value);
         }
         else
         {
-            menuItemSelected.Action();
-            RunMenu(CurrentMenu.Id);
+            selectedMenuItem.Action();
+            RunMenu(CurrentMenu.SubMenuId);
         }
     }
 
+    /// <summary>
+    /// Runs previous menu.
+    /// </summary>
     public void Back()
     {
         var previousMenu = MenuHistory.Last();
@@ -125,6 +155,4 @@ public class MenuCollection
         
         RunMenu(previousMenu);
     }
-
-    
 }

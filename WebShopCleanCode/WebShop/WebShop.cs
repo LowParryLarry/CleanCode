@@ -1,12 +1,17 @@
 ﻿namespace WebShopCleanCode.WebShop;
 
 using Static;
-using SortingAlgorithms;
 using System.Text.RegularExpressions;
 using Interfaces;
 using Menu;
 using States;
 using System.Reflection;
+
+/*
+ * Har läst på lite om dependency injection under tiden. Enligt denna princip så
+ * kanske jag borde vänt på pankakan. Att ha min WebShop i MenuCollection istället
+ * för att ha MenuCollection i WebShop. Jag förstod dock inte detta helt vad som är bäst.
+ */
 
 public class WebShop
 {
@@ -29,14 +34,28 @@ public class WebShop
         TempPassword = "jake123"; //string.Empty;
     }
 
+    /// <summary>
+    /// Used instead of string to avoid misspelling. 
+    /// </summary>
     private enum UserDataType
     {
         Username,
         Password
     }
     
+    /// <summary>
+    /// Creates mapping of menu system.
+    /// </summary>
+    /// <returns></returns>
     private MenuCollection CreateMenuCollection()
     {
+        /*
+         * Skapar meny-strukturen. Vet inte om SubMenuId räknas som magic number.
+         * Kom på i efterhand att jag borde lagt in SubMenu av typ Menu i MenuItem.
+         * På så sätt hade inte SubMenuId behövts. Och man hade kunnat skriva en
+         * rekursiv metod för att leta i meny-strukturen. Kom på detta för sent dock.
+         */
+        
         return new MenuCollection(this)
         {
             Menus =
@@ -45,7 +64,7 @@ public class WebShop
                 {
                     Title = "Main Menu",
                     Prompt = "What would you like to do?",
-                    Id = 0,
+                    SubMenuId = 0,
                     MenuItems =
                     {
                         new MenuItem
@@ -75,7 +94,7 @@ public class WebShop
                 {
                     Title = "Wares Menu",
                     Prompt = "What would you like to do?",
-                    Id = 1,
+                    SubMenuId = 1,
                     MenuItems =
                     {
                         new MenuItem
@@ -110,7 +129,7 @@ public class WebShop
                 {
                     Title = "Login Menu",
                     Prompt = "Please submit username and password.",
-                    Id = 2,
+                    SubMenuId = 2,
                     MenuItems =
                     {
                         new MenuItem
@@ -144,7 +163,7 @@ public class WebShop
                 {
                     Title = "Sort Menu",
                     Prompt = "How would you like to sort them?",
-                    Id = 3,
+                    SubMenuId = 3,
                     MenuItems =
                     {
                         new MenuItem
@@ -178,7 +197,7 @@ public class WebShop
                 {
                     Title = "Customer Menu",
                     Prompt = "What would you like to do?",
-                    Id = 4,
+                    SubMenuId = 4,
                     MenuItems =
                     {
                         new MenuItem
@@ -207,7 +226,7 @@ public class WebShop
                 {
                     Title = "Purchase Menu",
                     Prompt = "What would you like to purchase?",
-                    Id = 5,
+                    SubMenuId = 5,
                     MenuItems =
                     {
                         new MenuItem
@@ -221,13 +240,18 @@ public class WebShop
         };
     }
     
+    /// <summary>
+    /// Initiates the WebShop and menus.
+    /// </summary>
     public void Run()
     {
-        Console.WriteLine(MenuCollection.Menus.Count);
         Console.WriteLine("Welcome to the WebShop!");
         MenuCollection.RunMenu(MenuCollection.SelectedIndex);
     }
     
+    /// <summary>
+    /// Prints all wares to console.
+    /// </summary>
     private void PrintAllWares()
     {
         Utility.PrintEmptyLine();
@@ -235,6 +259,9 @@ public class WebShop
         Utility.PrintEmptyLine();
     }
 
+    /// <summary>
+    /// Prints current customer if logged in to console.
+    /// </summary>
     public void PrintCurrentUser()
     {
         if (CurrentCustomer == null)
@@ -245,11 +272,15 @@ public class WebShop
         
         Console.WriteLine($"Current user: {CurrentCustomer.Username}\n");
     }
-
+    
+    /// <summary>
+    /// Sets TempUsername and TempPassword for verification.
+    /// </summary>
+    /// <param name="promt"></param>
+    /// <param name="userDataType"></param>
     private void SetCredentials(string promt, UserDataType userDataType)
     {
         Console.CursorVisible = true;
-        
         Console.WriteLine("A keyboard appears.");
         Console.WriteLine(promt);
 
@@ -266,41 +297,62 @@ public class WebShop
         Utility.PrintEmptyLine();
     }
 
+    /// <summary>
+    /// Changes authentication state.
+    /// </summary>
+    /// <param name="state"></param>
     private void SetState(ILoginState state)
     {
         State = state;
     }
-
+    
+    /// <summary>
+    /// Change login state.
+    /// </summary>
     private void ToggleLoginStatus()
     {   
-        State.ToggleLoginState(this);
+        //Hade lite svårt med namngivningen här.
+        State.ChangeLoginState(this);
     }
-
+    
+    /// <summary>
+    /// Succsessful login message to console.
+    /// </summary>
+    /// <param name="customer"></param>
     private static void PrintAuthSuccess(Customer customer)
     {
         Console.WriteLine($"\n{customer.Username} logged in.\n");
     }
-
+    
+    /// <summary>
+    /// Changes "Login" to "Logout" and vice versa. Deletes Register menu on Login.
+    /// </summary>
     private void ToggleMenuExeptions()
     {
         /*
-         En riktig ful-lösning. Jag hade byggt menysystemet innan
-         jag insåg att det INTE var en statisk meny. Hade kanske
-         kunnat göra ett state för detta men det kändes dumt.
+         * En riktig ful-lösning. Jag hade byggt menysystemet innan jag insåg att det INTE
+         * var en statisk meny. Kom inte på en lösning utan att typ behöva göra om allt.
          */
-        
         foreach (var menu in MenuCollection.Menus.ToList())
         {
-            foreach (var menuItem in menu.MenuItems)
+            foreach (var menuItem in menu.MenuItems.ToList())
             {
                 if (menuItem.Title is "Login" or "Logout")
                 {
                     menuItem.Title = menuItem.Title == "Login" ? "Logout" : "Login";
                 }
+
+                if (menuItem.Title == "Register")
+                {
+                    menu.MenuItems.Remove(menuItem);
+                }
             }
         }
     }
 
+    /// <summary>
+    /// Adds new user to database and set user as authenticated.
+    /// </summary>
     private void RegisterUser()
     {
         Customer customer = new();
@@ -310,6 +362,10 @@ public class WebShop
         TryLogin();
     }
 
+    /// <summary>
+    /// Sets temp username.
+    /// </summary>
+    /// <param name="customer"></param>
     private void SetUsername(Customer customer)
     {
         while (true)
@@ -334,8 +390,18 @@ public class WebShop
         }
     }
     
+    /// <summary>
+    /// Sets temp userdata. 
+    /// </summary>
+    /// <param name="customer"></param>
     private void SetProperties(Customer customer)
     {
+        /*
+         * Jag ville vara smart och inte skriva en massa kod för att ange all
+         * användardata. Jag kom fram till att man kunde loopa igenom ett objekts
+         * properties. I efterhand så känns det lite overkill och ska efter mer
+         * reseach typdligen unvikas. Men det funkar :)
+         */
         var properties = GetCustomerProperties();
         foreach (var property in properties)
         {
@@ -357,11 +423,20 @@ public class WebShop
         TempPassword = customer.GetPassword();
     }
 
+    /// <summary>
+    /// Gets properties from Customer class.
+    /// </summary>
+    /// <returns></returns>
     private static IEnumerable<PropertyInfo> GetCustomerProperties()
     {
         return typeof(Customer).GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
     }
 
+    /// <summary>
+    /// Excludes properties not to be set by user.
+    /// </summary>
+    /// <param name="property"></param>
+    /// <returns></returns>
     private static bool PropertyExclusion(PropertyInfo property)
     {
         return property.PropertyType.IsGenericType &&
@@ -369,6 +444,11 @@ public class WebShop
                property.Name is "Funds" or "Username";
     }
 
+    /// <summary>
+    /// Edits property name by forcing lower case and adds white space.
+    /// </summary>
+    /// <param name="input"></param>
+    /// <returns></returns>
     private static string FormatPropertyName(string input)
     {
         var splitString = Regex.Replace(input, "([A-Z])", " $1");
@@ -376,6 +456,12 @@ public class WebShop
         return lowerCaseString;
     }
 
+    /// <summary>
+    /// Prompts user for current property.
+    /// </summary>
+    /// <param name="determiner"></param>
+    /// <param name="propertyName"></param>
+    /// <returns></returns>
     private static object UserInput(string determiner, string propertyName)
     {
         var formattedProperyName = FormatPropertyName(propertyName);
@@ -401,6 +487,11 @@ public class WebShop
         }
     }
 
+    /// <summary>
+    /// Returns int if input is a number.
+    /// </summary>
+    /// <param name="inputString"></param>
+    /// <returns></returns>
     private static object ConvertIfInt(object inputString) 
     {
         if (int.TryParse(inputString.ToString(), out var intValue))
@@ -411,6 +502,11 @@ public class WebShop
         return inputString;
     }
    
+    /// <summary>
+    /// Ensure user input is not null.
+    /// </summary>
+    /// <param name="propertyName"></param>
+    /// <returns></returns>
     private static string CheckForInputError(string propertyName)
     {
         const string inputError = "Please actually write something.\n";
@@ -434,6 +530,11 @@ public class WebShop
         return input;
     }
 
+    /// <summary>
+    /// Returns an or a depending on property name.
+    /// </summary>
+    /// <param name="word"></param>
+    /// <returns></returns>
     private static string GetDeterminer(string word)
     {
         if (string.IsNullOrEmpty(word)) return string.Empty;
@@ -444,6 +545,9 @@ public class WebShop
         return Array.IndexOf(vowels, firstLetter) >= 0 ? "an" : "a";
     }
 
+    /// <summary>
+    /// Tries to log in user if credentionals are correct.
+    /// </summary>
     public void TryLogin()
     {
         var customer = CheckCredentials(TempUsername, TempPassword);
@@ -457,52 +561,94 @@ public class WebShop
         LoginProcess(customer);
     }
 
+    /// <summary>
+    /// Logs in user.
+    /// </summary>
+    /// <param name="customer"></param>
     private void LoginProcess(Customer customer)
     {
         PrintAuthSuccess(customer);
         CurrentCustomer = customer;
         SetState(new AuthenticatedState());
+        
+        //Ingår i ful-lösningen
         ToggleMenuExeptions();
     }
 
+    /// <summary>
+    /// Returns customer if credentionals are correct.
+    /// </summary>
+    /// <param name="username"></param>
+    /// <param name="password"></param>
+    /// <returns></returns>
     private Customer CheckCredentials(string username, string password)
     {
         return Customers.FirstOrDefault(c =>
             c.CheckUsername(username) && c.CheckPassword(password));
     }
 
+    /// <summary>
+    /// Logs out current user.
+    /// </summary>
     public void Logout()
     {
         Console.WriteLine($"\n{CurrentCustomer.Username} logged out\n");
         CurrentCustomer = null;
         SetState(new UnAuthenticatedState());
         ResetTempData();
+        
+        //Ingår i ful-lösningen
         ToggleMenuExeptions();
+        MenuCollection = CreateMenuCollection();
+        //Magic number: Index för att uppdatera "Login menu" efter att Register har tagits bort
+        MenuCollection.RunMenu(2);
     }
 
-    public static void WithdrawFundsFromCustomer(Customer currentCustomer, Product product)
+    /// <summary>
+    /// Withdraws
+    /// </summary>
+    /// <param name="customer"></param>
+    /// <param name="product"></param>
+    public void WithdrawFundsFromCustomer(Customer customer, Product product)
     {
-        if (!product.ProductIsInStock())
+        if (!PurchaseConditions(customer, product))
         {
-            Console.WriteLine($"Not in stock.\n");
-            return;
-        }
-        if (!currentCustomer.CanAfford(product.Price))
-        {
-            Console.WriteLine($"You cannot afford.\n");
             return;
         }
         
-        currentCustomer.Funds -= product.Price;
-        currentCustomer.AddOrder(product.Name, product.Price);
+        customer.Funds -= product.Price;
+        customer.AddOrder(product.Name, product.Price);
         product.NrInStock--;
 
         Console.WriteLine($"Successfully bought {product.Name}\n");
     }
 
+    /// <summary>
+    /// Reset temporary credentionals.
+    /// </summary>
     private void ResetTempData()
     {
         TempUsername = string.Empty;
         TempPassword = string.Empty;
+    }
+
+    /// <summary>
+    /// Checks funds of customer and stock of product.
+    /// </summary>
+    /// <param name="customer"></param>
+    /// <param name="product"></param>
+    /// <returns></returns>
+    private static bool PurchaseConditions(Customer customer, Product product)
+    {
+        if (!product.ProductIsInStock())
+        {
+            Console.WriteLine("Not in stock.\n");
+            return false;
+        }
+
+        if (customer.CanAfford(product.Price)) return true;
+        Console.WriteLine("You cannot afford.\n");
+        return false;
+
     }
 }

@@ -4,7 +4,16 @@ using WebShop;
 
 public interface ILoginState
 {
+    /// <summary>
+    /// Depending on state, menu item will be run.
+    /// </summary>
+    /// <param name="menuCollection"></param>
+    /// <param name="selectedMenuItem"></param>
     void ProcessMenuItem(MenuCollection menuCollection, MenuItem selectedMenuItem);
 
-    void ToggleLoginState(WebShop webShop);
+    /// <summary>
+    /// Depending on state, changes state.
+    /// </summary>
+    /// <param name="webShop"></param>
+    void ChangeLoginState(WebShop webShop);
 }
