@@ -30,8 +30,8 @@ public class WebShop
         Products = Database.GetProducts();
         Customers = Database.GetCustomers();
         MenuCollection = CreateMenuCollection();
-        TempUsername = "jake"; 
-        TempPassword = "jake123";
+        TempUsername = string.Empty; 
+        TempPassword = string.Empty;
     }
 
     /// <summary>
