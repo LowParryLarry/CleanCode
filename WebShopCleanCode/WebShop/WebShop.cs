@@ -30,8 +30,8 @@ public class WebShop
         Products = Database.GetProducts();
         Customers = Database.GetCustomers();
         MenuCollection = CreateMenuCollection();
-        TempUsername = "jake"; //string.Empty; TODO To bort innan inlämning
-        TempPassword = "jake123"; //string.Empty;
+        TempUsername = "jake"; 
+        TempPassword = "jake123";
     }
 
     /// <summary>
